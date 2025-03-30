@@ -21,7 +21,7 @@ namespace ApplicationLogic.Services
             ILogger<ZeptoMailService> logger)
         {
             _httpClient = httpClient;
-            _logger = logger;
+            
         }
 
         public async Task<EmailResponse> SendEmailAsync(EmailRequest request)
