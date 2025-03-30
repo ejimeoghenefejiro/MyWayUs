@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using ApplicationLogic.Interfaces;
 using ApplicationLogic.Services;
+using Domain.DTOs;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddScoped<IZeptoMailService, ZeptoMailService>();
+builder.Services.Configure<ZeptoMailConfig>( builder.Configuration.GetSection(ZeptoMailConfig.SectionName));
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 //builder.Services.AddDbContext<AppDbContext>(options =>
    // options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ApplicationLogic.Interfaces;
 using Domain.Entities;
 using Infrastructure.External;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace ApplicationLogic.Services
@@ -15,15 +16,37 @@ namespace ApplicationLogic.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ZeptoMailService> _logger;
-
+        private readonly IConfiguration _config;
         public ZeptoMailService(
             HttpClient httpClient,
-            ILogger<ZeptoMailService> logger)
+            ILogger<ZeptoMailService> logger,
+            IConfiguration config)
         {
             _httpClient = httpClient;
-            
-        }
+            _logger = logger;
+            _config = config;
 
+            ValidateConfiguration();
+
+        }
+        private void ValidateConfiguration()
+        {
+            var fromEmail = _config["ZeptoMail:FromEmail"];
+            if (string.IsNullOrWhiteSpace(fromEmail))
+            {
+                throw new ArgumentNullException(
+                    "ZeptoMail:FromEmail",
+                    "Missing required email configuration");
+            }
+
+            var apiKey = _config["ZeptoMail:ApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new ArgumentNullException(
+                    "ZeptoMail:ApiKey",
+                    "Missing API key configuration");
+            }
+        }
         public async Task<EmailResponse> SendEmailAsync(EmailRequest request)
         {
             try
