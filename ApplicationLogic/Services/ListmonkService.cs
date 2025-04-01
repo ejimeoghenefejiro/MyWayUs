@@ -6,9 +6,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ApplicationLogic.Interfaces;
+using Domain.DTOs;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ApplicationLogic.Services
 {
@@ -18,20 +20,42 @@ namespace ApplicationLogic.Services
         private readonly HttpClient _httpClient;
         private readonly IZeptoMailService _zeptoMailService;
         private readonly ILogger<ListmonkService> _logger;
-        private readonly IConfiguration _config;
+        
+        private readonly ListmonkConfig _config;
 
         public ListmonkService(
             HttpClient httpClient,
             IZeptoMailService zeptoMailService,
-            ILogger<ListmonkService> logger,
-            IConfiguration config)
+            ILogger<ListmonkService> logger,           
+            IOptions<ListmonkConfig> config)
         {
             _httpClient = httpClient;
             _zeptoMailService = zeptoMailService;
             _logger = logger;
-            _config = config;
+            _config = config.Value;
+          
         }
+        private void ValidateConfiguration()
+        {
+            // Validate required configurations
+            var baseUrl = _config["Listmonk:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                throw new ArgumentNullException(
+                    "Listmonk:BaseUrl",
+                    "Missing Listmonk API base URL configuration");
+            }
 
+            var apiKey = _config["Listmonk:ApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new ArgumentNullException(
+                    "Listmonk:ApiKey",
+                    "Missing Listmonk API key configuration");
+            }
+
+            
+        }
         public async Task<SubscriptionResult> SubscribeAsync(SubscriberRequest request)
         {
             try

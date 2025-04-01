@@ -14,7 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddScoped<IZeptoMailService, ZeptoMailService>();
-builder.Services.Configure<ZeptoMailConfig>( builder.Configuration.GetSection(ZeptoMailConfig.SectionName));
+builder.Services.Configure<ZeptoMailConfig>( 
+    builder.Configuration.GetSection(ZeptoMailConfig.SectionName));
+
+builder.Services.Configure<ListmonkConfig>(
+    builder.Configuration.GetSection(ListmonkConfig.SectionName));
+
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 //builder.Services.AddDbContext<AppDbContext>(options =>
    // options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
