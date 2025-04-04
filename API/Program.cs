@@ -17,8 +17,9 @@ builder.Services.AddScoped<IZeptoMailService, ZeptoMailService>();
 builder.Services.Configure<ZeptoMailConfig>( 
     builder.Configuration.GetSection(ZeptoMailConfig.SectionName));
 
+
 builder.Services.Configure<ListmonkConfig>(
-    builder.Configuration.GetSection(ListmonkConfig.SectionName));
+    builder.Configuration.GetSection("Listmonk"));
 
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 //builder.Services.AddDbContext<AppDbContext>(options =>
@@ -32,15 +33,15 @@ builder.Services.AddHttpClient<IZeptoMailService, ZeptoMailService>(client =>
         $"Zoho-encryptedAPI {Environment.GetEnvironmentVariable("ZEPTOMAIL_API_KEY")}");
 });
 
+builder.Services.AddHttpClient<IZeptoMailService, ZeptoMailService>(client =>
+{
+    var config = builder.Configuration.GetSection(ZeptoMailConfig.SectionName).Get<ZeptoMailConfig>();
+    client.BaseAddress = new Uri("https://api.zeptomail.com/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
-//builder.Services.AddHttpClient<IZeptoMailService, ZeptoMailService>(client =>
-//{
-//    client.BaseAddress = new Uri("https://api.zeptomail.com/");
-//    client.DefaultRequestHeaders.Add("Authorization",
-//        $"Zoho-encryptedAPI {builder.Configuration["ZeptoMail:ApiKey"]}");
-//    client.DefaultRequestHeaders.Accept.Add(
-//        new MediaTypeWithQualityHeaderValue("application/json"));
-//});
+
+
 builder.Services.AddHttpClient<IListmonkService, ListmonkService>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Listmonk:BaseUrl"]);

@@ -20,41 +20,45 @@ namespace ApplicationLogic.Services
         private readonly HttpClient _httpClient;
         private readonly IZeptoMailService _zeptoMailService;
         private readonly ILogger<ListmonkService> _logger;
-        
+        private readonly ZeptoMailConfig _zconfig;
+
         private readonly ListmonkConfig _config;
 
         public ListmonkService(
             HttpClient httpClient,
             IZeptoMailService zeptoMailService,
             ILogger<ListmonkService> logger,           
-            IOptions<ListmonkConfig> config)
+            IOptions<ListmonkConfig> config,
+            IOptions<ZeptoMailConfig> zconfig)
         {
             _httpClient = httpClient;
             _zeptoMailService = zeptoMailService;
             _logger = logger;
             _config = config.Value;
-          
+            _zconfig = zconfig.Value;
+            ValidateConfiguration();
         }
         private void ValidateConfiguration()
         {
-            // Validate required configurations
-            var baseUrl = _config["Listmonk:BaseUrl"];
-            if (string.IsNullOrWhiteSpace(baseUrl))
+            if (string.IsNullOrWhiteSpace(_config.BaseUrl))
             {
                 throw new ArgumentNullException(
-                    "Listmonk:BaseUrl",
+                    nameof(ListmonkConfig.BaseUrl),
                     "Missing Listmonk API base URL configuration");
             }
 
-            var apiKey = _config["Listmonk:ApiKey"];
-            if (string.IsNullOrWhiteSpace(apiKey))
+            if (string.IsNullOrWhiteSpace(_config.ApiKey))
             {
                 throw new ArgumentNullException(
-                    "Listmonk:ApiKey",
+                    nameof(ListmonkConfig.ApiKey),
                     "Missing Listmonk API key configuration");
             }
-
-            
+            if (string.IsNullOrWhiteSpace(_zconfig.FromEmail))
+            {
+                throw new ArgumentNullException(
+                    nameof(ZeptoMailConfig.FromEmail),
+                    "Missing required email configuration");
+            }
         }
         public async Task<SubscriptionResult> SubscribeAsync(SubscriberRequest request)
         {
@@ -98,7 +102,7 @@ namespace ApplicationLogic.Services
                 var tasks = batch.Select(email => _zeptoMailService.SendEmailAsync(
                     new EmailRequest
                     {
-                        From = _config["ZeptoMail:FromEmail"],
+                        From = _zconfig.FromEmail,
                         To = email,
                         Subject = request.Subject,
                         Body = request.Content,

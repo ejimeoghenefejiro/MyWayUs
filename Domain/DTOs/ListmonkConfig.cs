@@ -14,10 +14,9 @@ namespace Domain.DTOs
         [Required]
         [Url]
         public string BaseUrl { get; set; }
-
         [Required]
         public string ApiKey { get; set; }
-
         public List<int> DefaultListIds { get; set; } = new();
+
     }
 }
